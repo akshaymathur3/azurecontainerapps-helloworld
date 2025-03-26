@@ -1,0 +1,44 @@
+name: Trigger auto deployment for akshay-container-app
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/akshay-container-app-AutoDeployTrigger-30e4da1f-a526-480e-8d5c-49594096e1e2.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AKSHAYCONTAINERAPP_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: akshayacr2.azurecr.io
+          registryUsername: ${{ secrets.AKSHAYCONTAINERAPP_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.AKSHAYCONTAINERAPP_REGISTRY_PASSWORD }}
+          containerAppName: akshay-container-app
+          resourceGroup: akshayrg-my-container-apps
+          imageToBuild: akshayacr2.azurecr.io/akshay-container-app:${{ github.sha }}
+          
+            
+
+     
+
